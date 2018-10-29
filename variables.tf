@@ -1,6 +1,3 @@
-#AWS
-variable "access_key" {}
-variable "secret_key" {}
 variable "admin_password" {}
 
 variable "aws_region" {
@@ -25,4 +22,8 @@ variable "influx_port" {
 
 variable "influx_database" {
   default = "metrics"
+}
+
+variable "inbound_cidr_blocks" {
+  default = ["0.0.0.0/0"]
 }

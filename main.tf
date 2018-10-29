@@ -1,59 +1,36 @@
 provider "aws" {
-  access_key = "${var.access_key}"
-  secret_key = "${var.secret_key}"
-  region     = "${var.aws_region}"
+  region = "${var.aws_region}"
+}
+
+data "template_file" "metricserver_userdata" {
+  template = "metricserver.tpl"
+
+  vars {
+    admin_password  = "${var.admin_password}"
+    grafana_port    = "${var.grafana_port}"
+    influx_port     = "${var.influx_port}"
+    influx_database = "${var.influx_database}"
+  }
 }
 
 data "aws_ami" "windows" {
   most_recent = true
+  owners      = ["amazon"]
 
   filter {
     name   = "name"
     values = ["${var.windows_ami_filter}"]
   }
-
-  owners = ["amazon"]
 }
 
 resource "aws_instance" "metricserver" {
-  ami               = "${data.aws_ami.windows.id}"
-  instance_type     = "${var.instance_type}"
-  security_groups   = ["${aws_security_group.metricserver_inbound.name}"]
-  
-  user_data = <<EOF
-    <script>
-      @powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-    </script>
-    <powershell>
-      $admin = [adsi]("WinNT://./administrator, user")
-      $admin.psbase.invoke("SetPassword", "${var.admin_password}")
+  ami             = "${data.aws_ami.windows.id}"
+  instance_type   = "${var.instance_type}"
+  security_groups = ["${aws_security_group.metricserver_inbound.name}"]
 
-      #Install non-sucking service manager
-      choco install -y nssm
-      
-      #Install Grafana
-      Set-Location C:\
-      Invoke-WebRequest https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-5.3.2.windows-amd64.zip -OutFile Grafana.zip
-      Expand-Archive C:\Grafana.zip
-      Get-Item C:\Grafana\Grafana* | Rename-Item -NewName Grafana
-      $Defaults = 'C:\Grafana\Grafana\conf\defaults.ini'
-      (Get-Content $Defaults) -Replace 'http_port = 3000','http_port=${var.grafana_port}' | Set-Content $Defaults
-      New-NetFirewallRule -DisplayName "Grafana" -Direction Inbound -Action Allow -LocalPort ${var.grafana_port} -Protocol TCP
-      nssm install Grafana "C:\Grafana\Grafana\bin\grafana-server.exe" 
-      Start-Service Grafana
-
-      #Install Influx
-      Set-Location C:\
-      Invoke-WebRequest https://dl.influxdata.com/influxdb/releases/influxdb-1.6.4_windows_amd64.zip -OutFile Influx.zip
-      Expand-Archive C:\Influx.zip
-      Get-Item C:\Influx\InfluxDB* | Rename-Item -NewName InfluxDB
-      New-NetFirewallRule -DisplayName "Influx" -Direction Inbound -Action Allow -LocalPort ${var.influx_port} -Protocol TCP
-      nssm install InfluxDB "C:\Influx\InfluxDB\influxd.exe"
-      Start-Service InfluxDB
-      C:\Influx\InfluxDB\influx.exe -execute 'CREATE DATABASE ${var.influx_database}'
-    </powershell>
-    EOF
+  user_data = "${data.template_file.metricserver_userdata.rendered}"
 }
+
 resource "aws_security_group" "metricserver_inbound" {
   name        = "metricserver_inbound"
   description = "Allow inbound traffic to metricserver"
@@ -62,14 +39,16 @@ resource "aws_security_group" "metricserver_inbound" {
     from_port   = "${var.grafana_port}"
     to_port     = "${var.grafana_port}"
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${var.inbound_cidr_blocks}"]
   }
+
   ingress {
     from_port   = "${var.influx_port}"
     to_port     = "${var.influx_port}"
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${var.inbound_cidr_blocks}"]
   }
+
   egress {
     from_port   = 0
     to_port     = 0
