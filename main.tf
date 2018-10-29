@@ -1,7 +1,7 @@
 provider "aws" {
   access_key = "${var.access_key}"
   secret_key = "${var.secret_key}"
-  region     = "${var.region}"
+  region     = "${var.aws_region}"
 }
 
 data "aws_ami" "windows" {
@@ -9,7 +9,7 @@ data "aws_ami" "windows" {
 
   filter {
     name   = "name"
-    values = ["Windows_Server-2016-English-Full-Base*"]
+    values = ["${var.windows_ami_filter}"]
   }
 
   owners = ["amazon"]
@@ -19,12 +19,15 @@ resource "aws_instance" "metricserver" {
   ami               = "${data.aws_ami.windows.id}"
   instance_type     = "${var.instance_type}"
   security_groups   = ["${aws_security_group.metricserver_inbound.name}"]
-
+  
   user_data = <<EOF
     <script>
       @powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
     </script>
     <powershell>
+      $admin = [adsi]("WinNT://./administrator, user")
+      $admin.psbase.invoke("SetPassword", "${var.admin_password}")
+
       #Install non-sucking service manager
       choco install -y nssm
       

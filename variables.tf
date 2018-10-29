@@ -1,8 +1,14 @@
 #AWS
 variable "access_key" {}
 variable "secret_key" {}
-variable "region" {
+variable "admin_password" {}
+
+variable "aws_region" {
   default = "us-west-2"
+}
+
+variable "windows_ami_filter" {
+  default = "Windows_Server-2016-English-Core-Base*"
 }
 
 variable "instance_type" {
