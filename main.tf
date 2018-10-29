@@ -41,7 +41,6 @@ resource "aws_instance" "metricserver" {
       nssm install Grafana "C:\Grafana\Grafana\bin\grafana-server.exe" 
       Start-Service Grafana
 
-
       #Install Influx
       Set-Location C:\
       Invoke-WebRequest https://dl.influxdata.com/influxdb/releases/influxdb-1.6.4_windows_amd64.zip -OutFile Influx.zip
