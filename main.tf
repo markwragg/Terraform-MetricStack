@@ -18,8 +18,6 @@ data "aws_ami" "windows" {
 resource "aws_instance" "metricserver" {
   ami               = "${data.aws_ami.windows.id}"
   instance_type     = "${var.instance_type}"
-  key_name          = "${var.key_name}"
-  get_password_data = true
   security_groups   = ["${aws_security_group.metricserver_inbound.name}"]
 
   user_data = <<EOF

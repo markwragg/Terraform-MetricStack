@@ -9,8 +9,6 @@ variable "instance_type" {
   default = "t2.micro"
 }
 
-variable "key_name" {}
-
 variable "grafana_port" {
   default = 8080
 }
