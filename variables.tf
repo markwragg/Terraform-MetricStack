@@ -27,3 +27,19 @@ variable "influx_database" {
 variable "inbound_cidr_blocks" {
   default = ["0.0.0.0/0"]
 }
+
+variable "grafana_version" {
+  default = "5.3.2"
+}
+
+variable "influx_version" {
+  default = "1.6.4"
+}
+
+variable "influx_udp_port" {
+  default = 8089
+}
+
+variable "influx_udp_database" {
+  default = "udp"
+}

@@ -2,14 +2,18 @@ provider "aws" {
   region = "${var.aws_region}"
 }
 
-data "template_file" "metricserver_userdata" {
-  template = "metricserver.tpl"
+data "template_file" "metricserver" {
+  template = "${file("metricserver.tpl")}"
 
   vars {
-    admin_password  = "${var.admin_password}"
-    grafana_port    = "${var.grafana_port}"
-    influx_port     = "${var.influx_port}"
-    influx_database = "${var.influx_database}"
+    admin_password      = "${var.admin_password}"
+    grafana_port        = "${var.grafana_port}"
+    grafana_version     = "${var.grafana_version}"
+    influx_port         = "${var.influx_port}"
+    influx_database     = "${var.influx_database}"
+    influx_version      = "${var.influx_version}"
+    influx_udp_port     = "${var.influx_udp_port}"
+    influx_udp_database = "${var.influx_udp_database}"
   }
 }
 
@@ -28,7 +32,7 @@ resource "aws_instance" "metricserver" {
   instance_type   = "${var.instance_type}"
   security_groups = ["${aws_security_group.metricserver_inbound.name}"]
 
-  user_data = "${data.template_file.metricserver_userdata.rendered}"
+  user_data = "${data.template_file.metricserver.rendered}"
 }
 
 resource "aws_security_group" "metricserver_inbound" {
@@ -46,6 +50,12 @@ resource "aws_security_group" "metricserver_inbound" {
     from_port   = "${var.influx_port}"
     to_port     = "${var.influx_port}"
     protocol    = "tcp"
+    cidr_blocks = ["${var.inbound_cidr_blocks}"]
+  }
+  ingress {
+    from_port   = "${var.influx_udp_port}"
+    to_port     = "${var.influx_udp_port}"
+    protocol    = "udp"
     cidr_blocks = ["${var.inbound_cidr_blocks}"]
   }
 
