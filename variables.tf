@@ -43,3 +43,11 @@ variable "influx_udp_port" {
 variable "influx_udp_database" {
   default = "udp"
 }
+
+variable "enable_rdp" {
+  default = false
+}
+
+variable "enable_udp_listener" {
+  default = true
+}

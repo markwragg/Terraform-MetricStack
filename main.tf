@@ -38,31 +38,51 @@ resource "aws_instance" "metricserver" {
 resource "aws_security_group" "metricserver_inbound" {
   name        = "metricserver_inbound"
   description = "Allow inbound traffic to metricserver"
+}
 
-  ingress {
-    from_port   = "${var.grafana_port}"
-    to_port     = "${var.grafana_port}"
-    protocol    = "tcp"
-    cidr_blocks = ["${var.inbound_cidr_blocks}"]
-  }
+resource "aws_security_group_rule" "influx" {
+  type              = "ingress"
+  from_port         = "${var.influx_port}"
+  to_port           = "${var.influx_port}"
+  protocol          = "tcp"
+  cidr_blocks       = ["${var.inbound_cidr_blocks}"]
+  security_group_id = "${aws_security_group.metricserver_inbound.id}"
+}
 
-  ingress {
-    from_port   = "${var.influx_port}"
-    to_port     = "${var.influx_port}"
-    protocol    = "tcp"
-    cidr_blocks = ["${var.inbound_cidr_blocks}"]
-  }
-  ingress {
-    from_port   = "${var.influx_udp_port}"
-    to_port     = "${var.influx_udp_port}"
-    protocol    = "udp"
-    cidr_blocks = ["${var.inbound_cidr_blocks}"]
-  }
+resource "aws_security_group_rule" "grafana" {
+  type              = "ingress"
+  from_port         = "${var.grafana_port}"
+  to_port           = "${var.grafana_port}"
+  protocol          = "tcp"
+  cidr_blocks       = ["${var.inbound_cidr_blocks}"]
+  security_group_id = "${aws_security_group.metricserver_inbound.id}"
+}
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+resource "aws_security_group_rule" "rdp" {
+  count             = "${var.enable_rdp ? 1 : 0}"
+  type              = "ingress"
+  from_port         = 3389
+  to_port           = 3389
+  protocol          = "tcp"
+  cidr_blocks       = ["${var.inbound_cidr_blocks}"]
+  security_group_id = "${aws_security_group.metricserver_inbound.id}"
+}
+
+resource "aws_security_group_rule" "udp_listener" {
+  count             = "${var.enable_udp_listener ? 1 : 0}"
+  type              = "ingress"
+  from_port         = "${var.influx_udp_port}"
+  to_port           = "${var.influx_udp_port}"
+  protocol          = "udp"
+  cidr_blocks       = ["${var.inbound_cidr_blocks}"]
+  security_group_id = "${aws_security_group.metricserver_inbound.id}"
+}
+
+resource "aws_security_group_rule" "default_egress" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = -1
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = "${aws_security_group.metricserver_inbound.id}"
 }

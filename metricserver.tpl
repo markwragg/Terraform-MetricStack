@@ -41,7 +41,8 @@
 "@
     Add-Content -Path 'C:\Influx\InfluxDB\influxdb.conf' -Value $UDPConfig
     New-NetFirewallRule -DisplayName "Influx" -Direction Inbound -Action Allow -LocalPort ${influx_port} -Protocol TCP
-    nssm install InfluxDB "C:\Influx\InfluxDB\influxd.exe" "-config C:\Influx\InfluxDB\influxdb.conf"
+    New-NetFirewallRule -DisplayName "InfluxUDP" -Direction Inbound -Action Allow -LocalPort ${influx_udp_port} -Protocol UDP
+    nssm install InfluxDB "C:\Influx\InfluxDB\influxd.exe" """-config C:\Influx\InfluxDB\influxdb.conf"""
     Start-Service InfluxDB
     C:\Influx\InfluxDB\influx.exe -execute 'CREATE DATABASE ${influx_database}'
     C:\Influx\InfluxDB\influx.exe -execute 'CREATE DATABASE ${influx_udp_database}'
