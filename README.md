@@ -54,3 +54,10 @@ The terraform code can be customised / defaults overrideen by adding the followi
 - `influx_udp_database` : The database created by default for metrcis from the UDP listener. Default: udp (you could make this the same as the REST API DB if you wanted to).
 - `enable_rdp` : Boolean. Use to enable/disable an AWS SG Firewall rule so you can RDP to the server. Default: false (no rule for RDP is created).
 - `enable_udp_listener` : Boolean. Use to enable/disable the UDP listener. Default: true (UDP listener is enabled).
+
+## More Information
+
+See these blog posts for more information:
+
+- http://wragg.io/windows-based-grafana-analytics-platform-via-influxdb-and-powershell/
+- http://wragg.io/deploying-an-influx-and-grafana-metrics-server-on-windows/
