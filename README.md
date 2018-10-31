@@ -2,13 +2,13 @@
 
 This repository contains Terraform code for deploying a single Windows 2016 Server in AWS with InfluxDB and Grafana installed as Windows Services and configured on default ports (configurable via variables), with those ports permitted from any internet address to the server.
 
-# Prerequisites
+## Prerequisites
 
 - An AWS account (if you have Free Tier then the default settings of this stack should not incur any costs).
 - An AWS Access Key created and configured on the machine you will be running Terraform (I suggest installing the AWS CLI and running `aws configure`).
 - Terraform installed.
 
-# Usage
+## Usage
 
 1. Clone/download the code in this repository.
 2. Open a terminal/shell and `cd` to the directory.
@@ -30,7 +30,7 @@ Write-Influx -Server http://<youripaddress>:8086 -Measure YourMeasure -Metrics @
 
 Look at the official guidance for Grafana for how to visualise your metrics.
 
-# Terraform Variables
+## Terraform Variables
 
 The terraform code can be customised / defaults overrideen by adding the following variables to a file named `terraform.tfvars`:
 
