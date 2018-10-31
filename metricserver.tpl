@@ -18,7 +18,7 @@
     Expand-Archive C:\Grafana.zip
     Get-Item C:\Grafana\Grafana* | Rename-Item -NewName Grafana
     $GrafanaConfig = 'C:\Grafana\Grafana\conf\defaults.ini'
-    (Get-Content $GrafanaConfig) -Replace 'http_port = 3000', 'http_port=${grafana_port}' | Set-Content $GrafanaConfig
+    (Get-Content $GrafanaConfig).Replace('http_port = 3000','http_port = ${grafana_port}') | Set-Content $GrafanaConfig
     New-NetFirewallRule -DisplayName "Grafana" -Direction Inbound -Action Allow -LocalPort ${grafana_port} -Protocol TCP
     nssm install Grafana "C:\Grafana\Grafana\bin\grafana-server.exe" 
     Start-Service Grafana
@@ -29,9 +29,10 @@
     Invoke-WebRequest https://dl.influxdata.com/influxdb/releases/influxdb-${influx_version}_windows_amd64.zip -OutFile Influx.zip
     Expand-Archive C:\Influx.zip
     Get-Item C:\Influx\InfluxDB* | Rename-Item -NewName InfluxDB
+    $InfluxConfig = 'C:\Influx\InfluxDB\influxdb.conf'
+    (Get-Content $InfluxConfig).Replace('# bind-address = ":8086"','bind-address = ":${influx_port}"') | Set-Content $InfluxConfig
     New-NetFirewallRule -DisplayName "Influx" -Direction Inbound -Action Allow -LocalPort ${influx_port} -Protocol TCP
     nssm install InfluxDB "C:\Influx\InfluxDB\influxd.exe" """-config C:\Influx\InfluxDB\influxdb.conf"""
-    Start-Service InfluxDB
     C:\Influx\InfluxDB\influx.exe -execute 'CREATE DATABASE ${influx_database}'
     
     if (${enable_udp_listener} -eq $true) {
@@ -45,12 +46,12 @@
   batch-pending = 10
   read-buffer = 0
 "@
-        Add-Content -Path 'C:\Influx\InfluxDB\influxdb.conf' -Value $UDPConfig
+        Add-Content -Path $InfluxConfig -Value $UDPConfig
         New-NetFirewallRule -DisplayName "InfluxUDP" -Direction Inbound -Action Allow -LocalPort ${influx_udp_port} -Protocol UDP
         C:\Influx\InfluxDB\influx.exe -execute 'CREATE DATABASE ${influx_udp_database}'
-        Restart-Service InfluxDB
     }
- 
+    Start-Service InfluxDB
+    
     
     
 </powershell>
