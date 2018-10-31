@@ -2,6 +2,8 @@
 
 This repository contains Terraform code for deploying a single Windows 2016 Server in AWS with InfluxDB and Grafana installed as Windows Services and configured on default ports (configurable via variables), with those ports permitted from any internet address to the server.
 
+Influx is a time-series database platform that can be used to store metrics. Grafana can be used to visualise those metrics via dashboards like these:
+
 <p align="center">
 <img src="http://wragg.io/content/images/2018/02/Grafana-Example-2.png" height=200>  <img src="http://wragg.io/content/images/2018/02/Grafana-TFS-Build-Dashboard.png" height=200>
 </p>
