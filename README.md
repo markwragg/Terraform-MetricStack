@@ -44,7 +44,7 @@ The terraform code can be customised / defaults overrideen by adding the followi
 - `inbound_cidr_blocks` : The CIDR blocks to allow inbound connections to the server from (applies to all ports). Default: Internet/Any.
 - `grafana_version` : The version of Grafana to install. Default: 5.3.2
 - `influx_version` : The version of Influx to install. Default: 1.6.4
-- `influx_udp_port` : The port for the Influx UDP listener to listen on (if enabled). Default> 8089
+- `influx_udp_port` : The port for the Influx UDP listener to listen on (if enabled). Default: 8089
 - `influx_udp_database` : The database created by default for metrcis from the UDP listener. Default: udp (you could make this the same as the REST API DB if you wanted to).
 - `enable_rdp` : Boolean. Use to enable/disable an AWS SG Firewall rule so you can RDP to the server. Default: false (no rule for RDP is created).
 - `enable_udp_listener` : Boolean. Use to enable/disable the UDP listener. Default: true (UDP listener is enabled).
