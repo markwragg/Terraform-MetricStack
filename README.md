@@ -2,6 +2,10 @@
 
 This repository contains Terraform code for deploying a single Windows 2016 Server in AWS with InfluxDB and Grafana installed as Windows Services and configured on default ports (configurable via variables), with those ports permitted from any internet address to the server.
 
+<p align="center">
+<img src="http://wragg.io/content/images/2018/02/Grafana-Example-2.png" height=200>  <img src="http://wragg.io/content/images/2018/02/Grafana-TFS-Build-Dashboard.png" height=200>
+</p>
+
 ## Prerequisites
 
 - An AWS account (if you have Free Tier then the default settings of this stack should not incur any costs).
