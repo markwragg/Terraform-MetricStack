@@ -19,7 +19,7 @@ This repository contains Terraform code for deploying a single Windows 2016 Serv
 7. When Grafana is ready, go to the URL provided for Grafana and log in with default credentials (admin / admin).
 8. Add an Influx datasource with http://localhost:8086 as the URL and "metrics" as the databsase name (and a second one if you want to write metrics via UDP with the database named "udp".
 
-By default a TCP and UDP listener will be enabled for Influx. Have a look at the official guide for how to write metrics to Influx, or you could install and use my Influx PowerShell module to send metrics anywhere where PowerShell is installed.
+By default a TCP and UDP listener will be enabled for Influx. Have a look at the official guide for how to write metrics to Influx, or you could install and use my [Influx PowerShell module](https://github.com/markwragg/PowerShell-Influx) to send metrics from anywhere where PowerShell is installed.
 
 To use my PowerShell module (an example):
 
