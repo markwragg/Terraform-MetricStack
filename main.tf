@@ -14,6 +14,7 @@ data "template_file" "metricserver" {
     influx_version      = "${var.influx_version}"
     influx_udp_port     = "${var.influx_udp_port}"
     influx_udp_database = "${var.influx_udp_database}"
+    enable_udp_listener = "${var.enable_udp_listener}"
   }
 }
 

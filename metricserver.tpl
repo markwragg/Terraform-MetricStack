@@ -29,7 +29,13 @@
     Invoke-WebRequest https://dl.influxdata.com/influxdb/releases/influxdb-${influx_version}_windows_amd64.zip -OutFile Influx.zip
     Expand-Archive C:\Influx.zip
     Get-Item C:\Influx\InfluxDB* | Rename-Item -NewName InfluxDB
-    $UDPConfig = @"
+    New-NetFirewallRule -DisplayName "Influx" -Direction Inbound -Action Allow -LocalPort ${influx_port} -Protocol TCP
+    nssm install InfluxDB "C:\Influx\InfluxDB\influxd.exe" """-config C:\Influx\InfluxDB\influxdb.conf"""
+    Start-Service InfluxDB
+    C:\Influx\InfluxDB\influx.exe -execute 'CREATE DATABASE ${influx_database}'
+    
+    if (${enable_udp_listener} -eq $true) {
+        $UDPConfig = @"
 [[udp]]
   enabled = true
   bind-address = ":${influx_udp_port}"
@@ -39,11 +45,12 @@
   batch-pending = 10
   read-buffer = 0
 "@
-    Add-Content -Path 'C:\Influx\InfluxDB\influxdb.conf' -Value $UDPConfig
-    New-NetFirewallRule -DisplayName "Influx" -Direction Inbound -Action Allow -LocalPort ${influx_port} -Protocol TCP
-    New-NetFirewallRule -DisplayName "InfluxUDP" -Direction Inbound -Action Allow -LocalPort ${influx_udp_port} -Protocol UDP
-    nssm install InfluxDB "C:\Influx\InfluxDB\influxd.exe" """-config C:\Influx\InfluxDB\influxdb.conf"""
-    Start-Service InfluxDB
-    C:\Influx\InfluxDB\influx.exe -execute 'CREATE DATABASE ${influx_database}'
-    C:\Influx\InfluxDB\influx.exe -execute 'CREATE DATABASE ${influx_udp_database}'
+        Add-Content -Path 'C:\Influx\InfluxDB\influxdb.conf' -Value $UDPConfig
+        New-NetFirewallRule -DisplayName "InfluxUDP" -Direction Inbound -Action Allow -LocalPort ${influx_udp_port} -Protocol UDP
+        C:\Influx\InfluxDB\influx.exe -execute 'CREATE DATABASE ${influx_udp_database}'
+        Restart-Service InfluxDB
+    }
+ 
+    
+    
 </powershell>
