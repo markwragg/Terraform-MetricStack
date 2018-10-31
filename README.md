@@ -11,13 +11,13 @@ This repository contains Terraform code for deploying a single Windows 2016 Serv
 # Usage
 
 1. Clone/download the code in this repository.
-- Open a terminal/shell and `cd` to the directory.
-- Run `terraform init` to initialize/download plugins.
-- Run `terraform apply`. You will be prompted for `admin_password`, enter whatever you want the local machine admin password to be on the deployed instance.
-- Review the plan and enter `yes`.
-- After a few minutes the deployment will complete and provide you with the Grafana and Influx URL, but on the default instance size (T2.micro) you will need to wait approximately 20 minutes for Grafana/Influx to be installed and ready.
-- When Grafana is ready, go to the URL provided for Grafana and log in with default credentials (admin / admin).
-- Add an Influx datasource with http://localhost:8086 as the URL and "metrics" as the databsase name (and a second one if you want to write metrics via UDP with the database named "udp".
+2. Open a terminal/shell and `cd` to the directory.
+3. Run `terraform init` to initialize/download plugins.
+4. Run `terraform apply`. You will be prompted for `admin_password`, enter whatever you want the local machine admin password to be on the deployed instance.
+5. Review the plan and enter `yes`.
+6. After a few minutes the deployment will complete and provide you with the Grafana and Influx URL, but on the default instance size (T2.micro) you will need to wait approximately 20 minutes for Grafana/Influx to be installed and ready.
+7. When Grafana is ready, go to the URL provided for Grafana and log in with default credentials (admin / admin).
+8. Add an Influx datasource with http://localhost:8086 as the URL and "metrics" as the databsase name (and a second one if you want to write metrics via UDP with the database named "udp".
 
 By default a TCP and UDP listener will be enabled for Influx. Have a look at the official guide for how to write metrics to Influx, or you could install and use my Influx PowerShell module to send metrics anywhere where PowerShell is installed.
 
