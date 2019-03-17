@@ -1,9 +1,5 @@
 provider "azurerm" {
-  subscription_id = "5b638ecc-c05a-4d62-b152-4898379da0d3"
-
-  # client_id       = "REPLACE-WITH-YOUR-CLIENT-ID"
-  # client_secret   = "REPLACE-WITH-YOUR-CLIENT-SECRET"
-  # tenant_id       = "REPLACE-WITH-YOUR-TENANT-ID"
+  subscription_id = "${var.subscription_id}"
 }
 
 data "template_file" "metricserver" {
@@ -50,6 +46,18 @@ resource "azurerm_network_interface" "metricserver" {
     name                          = "${var.prefix}-configuration1"
     subnet_id                     = "${azurerm_subnet.metricstack.id}"
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = "${azurerm_public_ip.metricserver.id}"
+  }
+}
+
+resource "azurerm_public_ip" "metricserver" {
+  name                = "${var.prefix}-PublicIp"
+  location            = "${azurerm_resource_group.metricstack.location}"
+  resource_group_name = "${azurerm_resource_group.metricstack.name}"
+  allocation_method   = "Dynamic"
+
+  tags = {
+    environment = "Production"
   }
 }
 
@@ -82,12 +90,14 @@ resource "azurerm_virtual_machine" "metricserver" {
     admin_password = "${var.admin_password}"
     custom_data    = "${data.template_file.metricserver.rendered}"
   }
-  os_profile_windows_config {}
+  os_profile_windows_config {
+     provision_vm_agent = true
+  }
 }
 
 resource "azurerm_virtual_machine_extension" "metricserver" {
   name                 = "metricserver"
-  location             = "West US"
+  location             = "${azurerm_resource_group.metricstack.location}"
   resource_group_name  = "${azurerm_resource_group.metricstack.name}"
   virtual_machine_name = "${azurerm_virtual_machine.metricserver.name}"
   publisher            = "Microsoft.Compute"
@@ -99,4 +109,10 @@ resource "azurerm_virtual_machine_extension" "metricserver" {
         "commandToExecute": "powershell -command copy-item \"c:\\AzureData\\CustomData.bin\" \"c:\\AzureData\\CustomData.ps1\";\"c:\\AzureData\\CustomData.ps1\""
     }
 SETTINGS
+}
+
+resource "azurerm_network_security_group" "metricserver_inbound" {
+  name = "metricserver_inbound"
+  location = "${azurerm_resource_group.metricstack.location}"
+  resource_group_name = "${azurerm_resource_group.metricstack.name}"
 }

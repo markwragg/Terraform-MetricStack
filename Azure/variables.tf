@@ -2,6 +2,8 @@ variable "prefix" {
   default = "metricstack"
 }
 
+variable "subscription_id" {}
+
 variable "admin_password" {}
 
 variable "azure_region" {
