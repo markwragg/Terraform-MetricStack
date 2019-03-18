@@ -1,7 +1,7 @@
 output "grafana_url" {
-  value = "http://tbc:${var.grafana_port}"
+  value = "http://${azurerm_public_ip.metricserver.ip_address}:${var.grafana_port}"
 }
 
 output "influx_url" {
-  value = "http://tbc:${var.influx_port}"
+  value = "http://${azurerm_public_ip.metricserver.ip_address}:${var.influx_port}"
 }

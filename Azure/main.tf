@@ -25,7 +25,7 @@ resource "azurerm_resource_group" "metricstack" {
 
 resource "azurerm_virtual_network" "metricstack" {
   name                = "${var.prefix}-network"
-  address_space       = ["10.0.0.0/16"]
+  address_space       = "${var.vnet_address_space}"
   location            = "${azurerm_resource_group.metricstack.location}"
   resource_group_name = "${azurerm_resource_group.metricstack.name}"
 }
@@ -34,7 +34,7 @@ resource "azurerm_subnet" "metricstack" {
   name                 = "internal"
   resource_group_name  = "${azurerm_resource_group.metricstack.name}"
   virtual_network_name = "${azurerm_virtual_network.metricstack.name}"
-  address_prefix       = "10.0.2.0/24"
+  address_prefix       = "${var.private_subnet_address_prefix}"
 }
 
 resource "azurerm_network_interface" "metricserver" {
@@ -90,8 +90,9 @@ resource "azurerm_virtual_machine" "metricserver" {
     admin_password = "${var.admin_password}"
     custom_data    = "${data.template_file.metricserver.rendered}"
   }
+
   os_profile_windows_config {
-     provision_vm_agent = true
+    provision_vm_agent = true
   }
 }
 
@@ -112,7 +113,65 @@ SETTINGS
 }
 
 resource "azurerm_network_security_group" "metricserver_inbound" {
-  name = "metricserver_inbound"
-  location = "${azurerm_resource_group.metricstack.location}"
+  name                = "metricserver_inbound"
+  location            = "${azurerm_resource_group.metricstack.location}"
   resource_group_name = "${azurerm_resource_group.metricstack.name}"
+}
+
+resource "azurerm_network_security_rule" "influx" {
+  name                        = "influx"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "${var.influx_port}"
+  destination_port_range      = "${var.influx_port}"
+  source_address_prefixes     = ["${var.inbound_cidr_blocks}"]
+  destination_address_prefix  = "${azurerm_network_interface.metricserver.private_ip_address}"
+  resource_group_name         = "${azurerm_resource_group.metricstack.name}"
+  network_security_group_name = "${azurerm_network_security_group.metricserver_inbound.name}"
+}
+
+resource "azurerm_network_security_rule" "grafana" {
+  name                        = "grafana"
+  priority                    = 200
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "${var.grafana_port}"
+  destination_port_range      = "${var.grafana_port}"
+  source_address_prefixes     = ["${var.inbound_cidr_blocks}"]
+  destination_address_prefix  = "${azurerm_network_interface.metricserver.private_ip_address}"
+  resource_group_name         = "${azurerm_resource_group.metricstack.name}"
+  network_security_group_name = "${azurerm_network_security_group.metricserver_inbound.name}"
+}
+
+resource "azurerm_network_security_rule" "udp_listener" {
+  count                       = "${var.enable_udp_listener ? 1 : 0}"
+  name                        = "udp_listener"
+  priority                    = 300
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Udp"
+  source_port_range           = "${var.influx_udp_port}"
+  destination_port_range      = "${var.influx_udp_port}"
+  source_address_prefixes     = ["${var.inbound_cidr_blocks}"]
+  destination_address_prefix  = "${azurerm_network_interface.metricserver.private_ip_address}"
+  resource_group_name         = "${azurerm_resource_group.metricstack.name}"
+  network_security_group_name = "${azurerm_network_security_group.metricserver_inbound.name}"
+}
+
+resource "azurerm_network_security_rule" "rdp" {
+  count                       = "${var.enable_rdp ? 1 : 0}"
+  name                        = "rdp"
+  priority                    = 500
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = 3389
+  destination_port_range      = 3389
+  source_address_prefixes     = ["${var.inbound_cidr_blocks}"]
+  destination_address_prefix  = "${azurerm_network_interface.metricserver.private_ip_address}"
+  resource_group_name         = "${azurerm_resource_group.metricstack.name}"
+  network_security_group_name = "${azurerm_network_security_group.metricserver_inbound.name}"
 }
