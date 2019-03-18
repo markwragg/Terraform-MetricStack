@@ -6,7 +6,6 @@ data "template_file" "metricserver" {
   template = "${file("CustomData.tpl")}"
 
   vars {
-    admin_password      = "${var.admin_password}"
     grafana_port        = "${var.grafana_port}"
     grafana_version     = "${var.grafana_version}"
     influx_port         = "${var.influx_port}"
