@@ -17,10 +17,10 @@ Influx is a time-series database platform that can be used to store metrics. Gra
 ## Usage
 
 1. Clone/download the code in this repository.
-2. Open a terminal/shell and `cd` to the directory.
+2. Open a terminal/shell and `cd` to either the AWS or Azure the directory.
 3. Run `terraform init` to initialize/download plugins.
-4. Run `terraform apply`. You will be prompted for `admin_password`, enter whatever you want the local machine admin password to be on the deployed instance.
-5. Review the plan and enter `yes`.
+4. Run `terraform apply`. You will be prompted for `admin_password`, enter whatever you want the local machine admin password to be on the deployed instance. For Azure you will additionally be prompted for the ID of the subscription you want to deploy to.
+5. Review the plan and enter `yes` (you should in particular be certain you're happy with the defaults that have been provided via `variables.tf`).
 6. After a few minutes the deployment will complete and provide you with the Grafana and Influx URL, but on the default instance size (T2.micro) you will need to wait approximately 20 minutes for Grafana/Influx to be installed and ready.
 7. When Grafana is ready, go to the URL provided for Grafana and log in with default credentials (admin / admin).
 8. Add an Influx datasource with http://localhost:8086 as the URL and "metrics" as the databsase name (and a second one if you want to write metrics via UDP with the database named "udp".
@@ -31,7 +31,7 @@ To use my PowerShell module (an example):
 
 ```
 Install-Module Influx
-Write-Influx -Server http://<youripaddress>:8086 -Measure YourMeasure -Metrics @{ CPU = 10; Memory = 50 }
+Write-Influx -Server http://<youripaddress>:8086 -Measure YourMeasure -Metrics @{ CPU = 10; Memory = 50 } -database 'metrics'
 ```
 
 Look at the official guidance for Grafana for how to visualise your metrics.

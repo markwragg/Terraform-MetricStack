@@ -18,6 +18,12 @@ data "template_file" "metricserver" {
   }
 }
 
+data "azurerm_public_ip" "metricserver" {
+  name                = "${azurerm_public_ip.metricserver.name}"
+  resource_group_name = "${azurerm_resource_group.metricstack.name}"
+  depends_on          = ["azurerm_virtual_machine.metricserver"]
+}
+
 resource "azurerm_resource_group" "metricstack" {
   name     = "MetricStack"
   location = "${var.azure_region}"
