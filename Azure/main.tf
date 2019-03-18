@@ -37,10 +37,11 @@ resource "azurerm_virtual_network" "metricstack" {
 }
 
 resource "azurerm_subnet" "metricstack" {
-  name                 = "internal"
-  resource_group_name  = "${azurerm_resource_group.metricstack.name}"
-  virtual_network_name = "${azurerm_virtual_network.metricstack.name}"
-  address_prefix       = "${var.private_subnet_address_prefix}"
+  name                      = "internal"
+  resource_group_name       = "${azurerm_resource_group.metricstack.name}"
+  virtual_network_name      = "${azurerm_virtual_network.metricstack.name}"
+  address_prefix            = "${var.private_subnet_address_prefix}"
+  network_security_group_id = "${azurerm_network_security_group.metricserver_inbound.id}"
 }
 
 resource "azurerm_network_interface" "metricserver" {
@@ -124,13 +125,18 @@ resource "azurerm_network_security_group" "metricserver_inbound" {
   resource_group_name = "${azurerm_resource_group.metricstack.name}"
 }
 
+resource "azurerm_subnet_network_security_group_association" "metricstack" {
+  subnet_id                 = "${azurerm_subnet.metricstack.id}"
+  network_security_group_id = "${azurerm_network_security_group.metricserver_inbound.id}"
+}
+
 resource "azurerm_network_security_rule" "influx" {
   name                        = "influx"
   priority                    = 100
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
-  source_port_range           = "${var.influx_port}"
+  source_port_range           = "*"
   destination_port_range      = "${var.influx_port}"
   source_address_prefixes     = ["${var.inbound_cidr_blocks}"]
   destination_address_prefix  = "${azurerm_network_interface.metricserver.private_ip_address}"
@@ -144,7 +150,7 @@ resource "azurerm_network_security_rule" "grafana" {
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
-  source_port_range           = "${var.grafana_port}"
+  source_port_range           = "*"
   destination_port_range      = "${var.grafana_port}"
   source_address_prefixes     = ["${var.inbound_cidr_blocks}"]
   destination_address_prefix  = "${azurerm_network_interface.metricserver.private_ip_address}"
@@ -159,7 +165,7 @@ resource "azurerm_network_security_rule" "udp_listener" {
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Udp"
-  source_port_range           = "${var.influx_udp_port}"
+  source_port_range           = "*"
   destination_port_range      = "${var.influx_udp_port}"
   source_address_prefixes     = ["${var.inbound_cidr_blocks}"]
   destination_address_prefix  = "${azurerm_network_interface.metricserver.private_ip_address}"
@@ -174,7 +180,7 @@ resource "azurerm_network_security_rule" "rdp" {
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
-  source_port_range           = 3389
+  source_port_range           = "*"
   destination_port_range      = 3389
   source_address_prefixes     = ["${var.inbound_cidr_blocks}"]
   destination_address_prefix  = "${azurerm_network_interface.metricserver.private_ip_address}"
