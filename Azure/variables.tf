@@ -4,7 +4,12 @@ variable "prefix" {
 
 variable "subscription_id" {}
 
-variable "admin_password" {}
+variable "rdp_admin_username" {
+  default = "metricadmin"
+}
+
+variable "rdp_admin_password" {}
+
 
 variable "vnet_address_space" {
   default = ["10.0.0.0/16"]
@@ -16,6 +21,10 @@ variable "private_subnet_address_prefix" {
 
 variable "azure_region" {
   default = "West US"
+}
+
+variable "vm_size" {
+  default = "Standard_DS1_v2"
 }
 
 variable "grafana_port" {

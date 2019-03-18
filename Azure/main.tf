@@ -73,7 +73,7 @@ resource "azurerm_virtual_machine" "metricserver" {
   location                         = "${azurerm_resource_group.metricstack.location}"
   resource_group_name              = "${azurerm_resource_group.metricstack.name}"
   network_interface_ids            = ["${azurerm_network_interface.metricserver.id}"]
-  vm_size                          = "Standard_DS1_v2"
+  vm_size                          = "${var.vm_size}"
   delete_os_disk_on_termination    = true
   delete_data_disks_on_termination = true
 
@@ -93,8 +93,8 @@ resource "azurerm_virtual_machine" "metricserver" {
 
   os_profile {
     computer_name  = "metricserver"
-    admin_username = "metricadmin"
-    admin_password = "${var.admin_password}"
+    admin_username = "${var.rdp_admin_username}"
+    admin_password = "${var.rdp_admin_password}"
     custom_data    = "${data.template_file.metricserver.rendered}"
   }
 
