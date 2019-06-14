@@ -12,11 +12,11 @@ variable "rdp_admin_password" {}
 
 
 variable "vnet_address_space" {
-  default = ["10.0.0.0/16"]
+  default = ["10.123.0.0/16"]
 }
 
 variable "private_subnet_address_prefix" {
-  default = "10.0.2.0/24"
+  default = "10.123.2.0/24"
 }
 
 variable "azure_region" {
