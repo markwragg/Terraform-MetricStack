@@ -10,7 +10,7 @@ Influx is a time-series database platform that can be used to store metrics. Gra
 
 ## Prerequisites
 
-- An AWS account (if you have Free Tier then the default settings of this stack should not incur any costs).
+- An Azure or AWS account (if you have Free Tier then the default settings of this stack should not incur any costs).
 - An AWS Access Key created and configured on the machine you will be running Terraform (I suggest installing the AWS CLI and running `aws configure`).
 - Terraform installed.
 
